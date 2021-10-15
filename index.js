@@ -7,6 +7,8 @@ const splitInput = (input) => {
 
 new Promise(async(resolve) => {
 
+    core.startGroup('Parsing input')
+
     const token = core.getInput('token')
     const title = core.getInput('title')
     const body = core.getInput('body')
@@ -19,14 +21,22 @@ new Promise(async(resolve) => {
     const reviewers = splitInput(core.getInput('reviewers'))
     const team_reviewers = splitInput(core.getInput('team-reviewers'))
     const milestone = Number(core.getInput('milestone'))
-
     const [owner, repo] = repository.split('/')
+
+    core.info(JSON.stringify({
+        title, body, draft, head, base, repository, labels,
+        assignees, reviewers, team_reviewers, milestone, owner, repo
+    },null,2))
+
+    core.endGroup()
+
+
+    core.startGroup('Create the pull request')
 
     const octokit = new Octokit({
         auth: token
     })
 
-    core.startGroup('Create the pull request')
     const params = {
         owner, repo, title, body, head, base, draft
     }
@@ -41,30 +51,43 @@ new Promise(async(resolve) => {
     const issue_number = pull.number
     const pull_number = pull.number
 
-    await Promise.all([
-        octokit.rest.issues.update({ owner, repo, issue_number, milestone }).then(() => {
+    const updates = []
+
+    if (milestone) {
+        core.info(`Queuing milestone update`)
+        updates.push(octokit.rest.issues.update({ owner, repo, issue_number, milestone }).then(() => {
             core.info(`Set milestone ${milestone} successfully`)
         }, (err) => {
             core.error(`Some error occurred while trying to set milestone: ${err.message}`)
-        }),
-        octokit.rest.issues.addLabels({ owner, repo, issue_number, labels }).then(() => {
+        }))
+    }
+
+    if (labels.length > 0) {
+        updates.push(octokit.rest.issues.addLabels({ owner, repo, issue_number, labels }).then(() => {
             core.info(`Set labels ${labels} successfully`)
         }, (err) => {
             core.error(`Some error occurred while trying to set labels: ${err.message}`)
-        }),
-        octokit.rest.issues.addAssignees({ owner, repo, issue_number, assignees }).then(() => {
+        }))
+    }
+
+    if (assignees.length > 0) {
+        updates.push(octokit.rest.issues.addAssignees({ owner, repo, issue_number, assignees }).then(() => {
             core.info(`Set assignees ${assignees} successfully`)
         }, (err) => {
             core.error(`Some error occurred while trying to set assignees: ${err.message}`)
-        }),
-        octokit.rest.pulls.requestReviewers({ owner, repo, pull_number, reviewers, team_reviewers }).then(() => {
+        }))
+    }
+
+    if ((reviewers.length > 0) || (team_reviewers.length > 0)) {
+        updates.push(octokit.rest.pulls.requestReviewers({ owner, repo, pull_number, reviewers, team_reviewers }).then(() => {
             const set = [ ...team_reviewers, ...reviewers ]
             core.info(`Set reviewers ${set} successfully`)
         }, (err) => {
             core.error(`Some error occurred while trying to set reviewers: ${err.message}`)
-        })
-    ])
+        }))
+    }
 
+    await Promise.all(updates)
     core.endGroup()
 
     resolve()
