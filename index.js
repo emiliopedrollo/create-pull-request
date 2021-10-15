@@ -1,5 +1,5 @@
-import core from "@actions/core";
-import {Octokit} from "./client";
+const core = require("@actions/core");
+const { Octokit } = require("./client");
 
 await new Promise(async(resolve) => {
 

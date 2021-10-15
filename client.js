@@ -1,7 +1,7 @@
-import {Octokit as Core} from '@octokit/core'
-import {paginateRest} from "@octokit/plugin-paginate-rest";
-import {restEndpointMethods} from "@octokit/plugin-rest-endpoint-methods";
-import {HttpsProxyAgent} from 'https-proxy-agent'
+const { Octokit: Core } = require('@octokit/core')
+const { paginateRest} = require("@octokit/plugin-paginate-rest")
+const { restEndpointMethods} = require("@octokit/plugin-rest-endpoint-methods")
+const { HttpsProxyAgent} = require('https-proxy-agent')
 
 
 export const Octokit = Core.plugin(
