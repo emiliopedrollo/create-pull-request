@@ -20,7 +20,7 @@ jobs:
       - id: branch
         run: echo ::set-output name=ref::${{ format('auto/pr/{0}/{1}', github.run_number, github.run_attempt) }}
 
-      - uses: crazy-max/ghaction-import-gpg@8c43807e82148a7bafc633cc9584d04bf54be8d0
+      - uses: chipinside/ghaction-import-gpg@v4.0.0
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           git_user_signingkey: true
@@ -31,7 +31,7 @@ jobs:
 
       - id: generate-token
         name: Create App Token
-        uses: tibdex/github-app-token@cdb5bfda87db263e4be5c6f570c4c39611ee952a
+        uses: chipinside/github-app-token@v1.4.0
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
@@ -53,7 +53,7 @@ jobs:
 
       - id: pr
         name: Create PR to master
-        uses: emiliopedrollo/create-pull-request@master
+        uses: chipinside/create-pull-request@master
         with:
           token: ${{ steps.generate-token.outputs.token }}
           base: master
