@@ -1,4 +1,4 @@
-name: "Create Pull Request"
+name: "Creates Pull Request"
 description: "Creates a Pull Request"
 runs:
   using: node12
