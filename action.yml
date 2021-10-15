@@ -1,0 +1,35 @@
+name: "Create Pull Request"
+description: "Creates a Pull Request"
+runs:
+  using: node12
+  main: index.js
+branding:
+  icon: git-pull-request
+  color: gray-dark
+inputs:
+  token:
+    description: 'A token that can be used to authenticate within GitHub with content write access to your repo'
+    default: ${{ github.token }}
+  title:
+    description: 'The title of the Pull Request'
+    default: 'Auto generated Pull Request by action create-pull-request'
+  body:
+    description: 'The body of the pull request'
+    default: 'See Files changed for more details'
+  draft:
+    description: 'Create a draft pull request'
+    default: false
+  head:
+    description: 'The Pull Request head branch'
+    default: ${{ github.ref }}
+  base:
+    description: 'The Pull Request base branch'
+    default: 'master'
+  repository:
+    description: 'The owner and repository'
+    default: ${{ github.repository }}
+outputs:
+  pull-request-number:
+    description: 'The Pull Request number'
+
+
