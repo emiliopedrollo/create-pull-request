@@ -1,7 +1,7 @@
 const core = require("@actions/core");
 const { Octokit } = require("./client");
 
-await new Promise(async(resolve) => {
+new Promise(async(resolve) => {
 
     const token = core.getInput('token')
     const title = core.getInput('title')
@@ -14,13 +14,22 @@ await new Promise(async(resolve) => {
 
     const [owner, repo] = repository.split('/')
 
+
     const octokit = new Octokit({
         auth: token
     })
 
-    await octokit.rest.pulls.create({
+    core.startGroup('Create the pull request')
+    const {data: pull} = await octokit.rest.pulls.create({
         owner, repo, title, body, head, base, draft
     })
+
+    core.debug(pull)
+    core.debug(JSON.stringify(pull,null,2))
+    core.exportVariable('PULL_REQUEST_NUMBER', pull.number)
+    core.setOutput('pull-request-number', pull.number)
+
+    core.endGroup()
 
     resolve()
 
