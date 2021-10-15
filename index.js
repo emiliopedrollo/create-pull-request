@@ -1,36 +1,74 @@
 const core = require("@actions/core");
 const { Octokit } = require("./client");
 
+const splitInput = (input) => {
+    return input.split(/[\n,]+/).map(s => s.trim()).filter(s => s !== '');
+}
+
 new Promise(async(resolve) => {
 
     const token = core.getInput('token')
     const title = core.getInput('title')
     const body = core.getInput('body')
-    const draft = core.getInput('draft')
+    const draft = core.getBooleanInput('draft')
     const head = core.getInput('head')
     const base = core.getInput('base')
     const repository = core.getInput('repository')
-
+    const labels = splitInput(core.getInput('labels'))
+    const assignees = splitInput(core.getInput('assignees'))
+    const reviewers = splitInput(core.getInput('reviewers'))
+    const team_reviewers = splitInput(core.getInput('team-reviewers'))
+    const milestone = Number(core.getInput('milestone'))
 
     const [owner, repo] = repository.split('/')
-
 
     const octokit = new Octokit({
         auth: token
     })
 
     core.startGroup('Create the pull request')
-    const {data: pull} = await octokit.rest.pulls.create({
+    const params = {
         owner, repo, title, body, head, base, draft
-    })
+    }
 
-    core.debug(pull)
-    core.debug(JSON.stringify(pull,null,2))
+    const {data: pull} = await octokit.rest.pulls.create(params)
+    core.info(JSON.stringify(pull,null,2))
     core.exportVariable('PULL_REQUEST_NUMBER', pull.number)
     core.setOutput('pull-request-number', pull.number)
+
+    core.endGroup()
+    core.startGroup('Updating the pull request with milestone, labels, assignees and reviewers')
+    const issue_number = pull.number
+    const pull_number = pull.number
+
+    await Promise.all([
+        octokit.rest.issues.update({ owner, repo, issue_number, milestone }).then(() => {
+            core.info(`Set milestone ${milestone} successfully`)
+        }, (err) => {
+            core.error(`Some error occurred while trying to set milestone: ${err.message}`)
+        }),
+        octokit.rest.issues.addLabels({ owner, repo, issue_number, labels }).then(() => {
+            core.info(`Set labels ${labels} successfully`)
+        }, (err) => {
+            core.error(`Some error occurred while trying to set labels: ${err.message}`)
+        }),
+        octokit.rest.issues.addAssignees({ owner, repo, issue_number, assignees }).then(() => {
+            core.info(`Set assignees ${assignees} successfully`)
+        }, (err) => {
+            core.error(`Some error occurred while trying to set assignees: ${err.message}`)
+        }),
+        octokit.rest.pulls.requestReviewers({ owner, repo, pull_number, reviewers, team_reviewers }).then(() => {
+            const set = [ ...team_reviewers, ...reviewers ]
+            core.info(`Set reviewers ${set} successfully`)
+        }, (err) => {
+            core.error(`Some error occurred while trying to set reviewers: ${err.message}`)
+        })
+    ])
 
     core.endGroup()
 
     resolve()
 
-}).then()
+}).then(() => {
+    core.info('Finished')
+})

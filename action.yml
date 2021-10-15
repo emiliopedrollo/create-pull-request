@@ -28,6 +28,18 @@ inputs:
   repository:
     description: 'The owner and repository'
     default: ${{ github.repository }}
+  labels:
+    description: 'A comma or newline separated list of labels'
+  assignees:
+    description: 'A comma or newline separated list of assignees'
+  reviewers:
+    description: 'A comma or newline separated list of reviewers'
+  team-reviewers:
+    description: >
+      A comma or newline separated list of GitHub teams to set as reviewers
+      Note: A `repo` scoped Personal Access Token (PAT) may be required
+  milestone:
+    description: 'The number of the milestone to associate with the pull request'
 outputs:
   pull-request-number:
     description: 'The Pull Request number'

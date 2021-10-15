@@ -44,11 +44,11 @@ jobs:
         run: date +%s > timestamp
 
       - id: commit
-        name: Change something
+        name: Commit
         run: git commit --allow-empty -m "New branch for release ${{ steps.release.outputs.version }}"
 
       - id: push
-        name: Change something
+        name: Push
         run: git push --force --set-upstream origin ${{ steps.branch.outputs.ref }}
 
       - id: pr
