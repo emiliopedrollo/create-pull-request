@@ -88,6 +88,7 @@ new Promise(async(resolve) => {
     }
 
     await Promise.all(updates)
+    core.info(`Executed ${updates.length} updates`)
     core.endGroup()
 
     resolve()
