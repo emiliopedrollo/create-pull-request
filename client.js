@@ -4,7 +4,7 @@ const { restEndpointMethods } = require("@octokit/plugin-rest-endpoint-methods")
 const { HttpsProxyAgent } = require('https-proxy-agent')
 
 
-export const Octokit = Core.plugin(
+exports.Octokit = Core.plugin(
     paginateRest, restEndpointMethods, autoProxyAgent
 )
 
