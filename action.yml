@@ -1,7 +1,7 @@
 name: "Creates Pull Request"
 description: "Creates a Pull Request"
 runs:
-  using: node12
+  using: node20
   main: index.js
 branding:
   icon: git-pull-request
@@ -18,7 +18,7 @@ inputs:
     default: 'See Files changed for more details'
   draft:
     description: 'Create a draft pull request'
-    default: false
+    default: "FALSE"
   head:
     description: 'The Pull Request head branch'
     default: ${{ github.ref }}
