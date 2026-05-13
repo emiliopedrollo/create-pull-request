@@ -1,7 +1,7 @@
 name: "Creates Pull Request"
 description: "Creates a Pull Request"
 runs:
-  using: node20
+  using: node24
   main: index.js
 branding:
   icon: git-pull-request
